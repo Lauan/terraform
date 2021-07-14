@@ -1,6 +1,6 @@
-environment = "sandbox"
+environment = "playground"
 billing = "storage"
-product = "downsiide"
+product = "upsiide"
 region = "ca-central-1"
 account_id = "553978640171"
 cluster_enabled_log_types = ["api"]
