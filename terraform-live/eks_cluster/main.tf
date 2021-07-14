@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "eks_cluster" {
-  source = "../../eks_cluster"
+  source = "../../terraform-aws-ekscluster"
   environment = var. environment
   billing = var. billing
   product = var. product
