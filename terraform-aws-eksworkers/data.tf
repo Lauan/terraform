@@ -39,35 +39,30 @@ data "aws_subnet_ids" "public" {
 }
 
 ////////////////////////////////////
-// IAM
+// EKS
 ////////////////////////////////////
 
-// Generate a EKS cluster role policy json
-data "aws_iam_policy_document" "cluster_role" {
-  statement {
-    sid = "EKSClusterAssumeRole"
-    actions = [
-      "sts:AssumeRole",
-    ]
-    principals {
-      type        = "Service"
-      identifiers = ["eks.amazonaws.com"]
-    }
+data "aws_eks_cluster" "main" {
+  name = local.eks_cluster_name
+}
+
+////////////////////////////////////
+// WORKERS SECURITY GROUP
+////////////////////////////////////
+
+data "aws_security_groups" "workers" {
+  filter {
+    name   = "group-name"
+    values = ["${local.name_prefix}-sg-eks-workers"]
   }
 }
 
-// Generate a EKS worker role policy json
-data "aws_iam_policy_document" "workers_role" {
-  statement {
-    sid = "EKSWorkerAssumeRole"
-    actions = [
-      "sts:AssumeRole",
-    ]
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
+////////////////////////////////////
+// IAM
+////////////////////////////////////
+
+data "aws_iam_role" "workers" {
+  name = "EKSWorkersServiceRole"
 }
 
 // Generate a KMS Key policy to allow log encryption

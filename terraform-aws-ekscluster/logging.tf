@@ -6,9 +6,6 @@ resource "aws_kms_key" "eks_cluster" {
     local.common_tags,
     {
       Name = "${local.name_prefix}-kms-key-cluster-loggroup"
-    },
-    {
-      Lifecycle = "Cluster applications"
     }
   )
 }
@@ -21,9 +18,6 @@ resource "aws_cloudwatch_log_group" "cluster" {
     local.common_tags,
     {
       Name = "${local.name_prefix}-loggroup-cluster"
-    },
-    {
-      Lifecycle = "Cluster applications"
     }
   )
 }

@@ -3,12 +3,8 @@ variable "environment" {
   type        = string
 }
 
-variable "billing" {
-  description = "Structure billing identifier (network, database, application, etc)"
-}
-
-variable "product" {
-  description = "Main identifier of the product"
+variable "application" {
+  description = "Main identifier of the application"
 }
 
 variable "region" {
@@ -16,27 +12,10 @@ variable "region" {
   type        = string
 }
 
-variable "account_id" {
-  description = "Account ID to use on roles and policies"
+variable "public_key"{
+  description = "Public key to create the KeyPair for the worker nodes"
   type        = string
 }
-
-// variable "minimum_ondemand_instances"{
-//   description = "Minimum number of on-demand instances to be provisioned on the cluster"
-//   type        = number
-//   default     = 2
-// }
-
-// variable "ondemand_instances_over_spot" {
-//   description = "Share (percentage) of on-demand instances to be provisioned after 'minimum_ondemand_instances' capacity is reached. The rest of the instances will be Spot"
-//   type        = number
-//   default     = 100
-// }
-
-// variable "spot_max_price" {
-//   description = "Max price to pay for Spot Instances"
-//   type        = string
-// }
 
 variable "eks_oidc_root_ca_thumbprint" {
   type        = string
@@ -77,22 +56,4 @@ variable "cluster_public_access_cidrs" {
 variable "cluster_service_ipv4_cidr" {
   description = "CIDR to be used by the kubernetes cluster for services."
   type        = string
-}
-
-variable "kubeconfig_aws_authenticator_command" {
-  description = "Command to use to fetch AWS EKS credentials."
-  type        = string
-  default     = "aws-iam-authenticator"
-}
-
-variable "kubeconfig_aws_authenticator_command_args" {
-  description = "Default arguments passed to the authenticator command. Defaults to [token -i $cluster_name]."
-  type        = list(string)
-  default     = []
-}
-
-variable "output_kubeconfig" {
-  description = "If set to true, the kubeconfig file will be printed as output"
-  type        = bool
-  default     = true
 }

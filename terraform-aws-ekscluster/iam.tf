@@ -1,16 +1,11 @@
 resource "aws_iam_role" "cluster" {
   name                  = "EKSClusterServiceRole"
   assume_role_policy    = data.aws_iam_policy_document.cluster_role.json
-  // permissions_boundary  = var.permissions_boundary
-  // path                  = var.iam_path
-  // force_detach_policies = true
+  // Path must not be set for cluster and workers (workers join into cluster will fail if any path is set)
   tags              = merge(
     local.common_tags,
     {
       Name = "${local.name_prefix}-iam-role-cluster"
-    },
-    {
-      Lifecycle = "Cluster applications"
     }
   )
 }
@@ -30,39 +25,38 @@ resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSVPCResourceControlle
   role       = aws_iam_role.cluster.name
 }
 
-// CREATE ROLE FOR EKS AUTOSCALING
-resource "aws_iam_role" "autoscaler" {
-  name               = "EKSAutoscalerServiceRole"
-  description        = "Role used by Kubernetes to send autoscale requests to EKS"
-  assume_role_policy = data.aws_iam_policy_document.cluster_autoscaler_role.json
+// IAM ROLE FOR WORKERS
+
+resource "aws_iam_role" "workers" {
+  name                  = "EKSWorkersServiceRole"
+  assume_role_policy    = data.aws_iam_policy_document.workers_role.json
+  // Path must not be set for cluster and workers (workers join into cluster will fail if any path is set)
+  force_detach_policies = true
   tags              = merge(
     local.common_tags,
     {
-      Name = "${local.name_prefix}-iam-role-autoscaler"
+      Name = "${local.name_prefix}-iam-role-workers"
     },
     {
-      Lifecycle = "Cluster applications"
+      "eks/${data.aws_caller_identity.current.account_id}/${local.eks_cluster_name}/groups" = "system:bootstrappers::system:nodes"
+    },
+    {
+      "eks/${data.aws_caller_identity.current.account_id}/${local.eks_cluster_name}/type" = "node"
     }
   )
 }
 
-//CREATE POLICY FOR EKS AUTOSCALING
-resource "aws_iam_role_policy" "autoscaler" {
-  name               = "EKSAutoscalerPolicy"
-  role               = aws_iam_role.autoscaler.id
-  policy             = data.aws_iam_policy_document.cluster_autoscaler_policy.json
+resource "aws_iam_role_policy_attachment" "workers_AmazonEKSWorkerNodePolicy" {
+  policy_arn = "${local.policy_arn_prefix}/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.workers.name
 }
 
-// IRSA (IAM Roles for EKS Service Accounts)
-// resource "aws_iam_openid_connect_provider" "oidc_provider" {
-//   client_id_list  = [local.sts_principal]
-//   thumbprint_list = [var.eks_oidc_root_ca_thumbprint]
-//   url             = flatten(concat(aws_eks_cluster.cluster.identity.oidc.0.issuer, [""]))[0]
+resource "aws_iam_role_policy_attachment" "workers_AmazonEKS_CNI_Policy" {
+  policy_arn = "${local.policy_arn_prefix}/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.workers.name
+}
 
-//   tags = merge(
-//     {
-//       Name = "${var.cluster_name}-eks-irsa"
-//     },
-//     var.tags
-//   )
-// }
+resource "aws_iam_role_policy_attachment" "workers_AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "${local.policy_arn_prefix}/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.workers.name
+}

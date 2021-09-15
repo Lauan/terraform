@@ -7,9 +7,6 @@ resource "aws_security_group" "cluster" {
     local.common_tags,
     {
       Name = "${local.name_prefix}-sg-eks-cluster"
-    },
-    {
-      Lifecycle = "Cluster Applications"
     }
   )
 }
@@ -54,9 +51,6 @@ resource "aws_security_group" "workers" {
     local.common_tags,
     {
       Name = "${local.name_prefix}-sg-eks-workers"
-    },
-    {
-      Lifecycle = "Cluster Applications"
     }
   )
 }
@@ -81,25 +75,25 @@ resource "aws_security_group_rule" "workers_ingress_all_cluster" {
   type                      = "ingress"
 }
 
-resource "aws_security_group_rule" "workers_ingress_tls_cluster" {
-  description               = "Allow pods to receive communication from control plane."
-  protocol                  = "tcp"
-  security_group_id         = aws_security_group.workers.id
-  source_security_group_id  = aws_security_group.cluster.id
-  from_port                 = 443
-  to_port                   = 443
-  type                      = "ingress"
-}
+// resource "aws_security_group_rule" "workers_ingress_tls_cluster" {
+//   description               = "Allow pods to receive communication from control plane."
+//   protocol                  = "tcp"
+//   security_group_id         = aws_security_group.workers.id
+//   source_security_group_id  = aws_security_group.cluster.id
+//   from_port                 = 443
+//   to_port                   = 443
+//   type                      = "ingress"
+// }
 
-resource "aws_security_group_rule" "workers_ingress_ssh" {
-  description               = "Allow ssh access from home."
-  protocol                  = "tcp"
-  security_group_id         = aws_security_group.workers.id
-  from_port                 = 22
-  to_port                   = 22
-  cidr_blocks               = ["177.200.199.37/32"]
-  type                      = "ingress"
-}
+// resource "aws_security_group_rule" "workers_ingress_ssh" {
+//   description               = "Allow ssh access from home."
+//   protocol                  = "tcp"
+//   security_group_id         = aws_security_group.workers.id
+//   from_port                 = 22
+//   to_port                   = 22
+//   cidr_blocks               = ["177.200.199.37/32"]
+//   type                      = "ingress"
+// }
 
 resource "aws_security_group_rule" "workers_egress_tls_cluster" {
   description               = "Allow workers to reach control plane."
